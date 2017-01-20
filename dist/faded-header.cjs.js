@@ -1929,27 +1929,17 @@ function zeroArray(arr, length) {
 
 var index = Color;
 
-function fadedHeader(headerSelector, collapseMargin, collapsedColor) {
+function fadedHeader(headerSelector, collapseMargin, backgroundColor, textColor) {
 	var header = document.querySelector(headerSelector);
 
-	var collapsedBackgroundColor = new index(collapsedColor);
+	var collapsedBackgroundColor = new index(backgroundColor);
+	var collapsedTextColor = new index(textColor);
+
 	var headerBackgroundColor = new index(window.getComputedStyle(header).getPropertyValue('background-color'));
+	if (headerBackgroundColor.valpha === 0) headerBackgroundColor = new index(backgroundColor).alpha(0);
 
-	if (headerBackgroundColor.valpha === 0) headerBackgroundColor = new index(collapsedColor).alpha(0);
-
-	var isCollapsed = header.classList.contains('collapsed');
-	if (!isCollapsed) header.classList.add('collapsed');
-	console.log({ headerBackgroundColor: headerBackgroundColor, collapsedBackgroundColor: collapsedBackgroundColor });
-
-	if (isCollapsed && header.getBoundingClientRect().bottom > collapseMargin) {
-		header.classList.add('notransition');
-		header.classList.add('collapsed');
-		window.requestAnimationFrame(function () {
-			window.requestAnimationFrame(function () {
-				header.classList.remove('notransition');
-			});
-		});
-	}
+	var headerTextColor = new index(window.getComputedStyle(header).getPropertyValue('color'));
+	if (headerTextColor.valpha === 0) headerTextColor = new index(textColor).alpha(0);
 
 	['resize', 'scroll'].map(function (event) {
 		window.addEventListener(event, function () {
@@ -1958,29 +1948,24 @@ function fadedHeader(headerSelector, collapseMargin, collapsedColor) {
 	});
 
 	function step() {
-		var headerRect = header.getBoundingClientRect();
-		var headerHeight = header.clientHeight;
-
-		if (header.classList.contains('collapsed')) {
-			if (headerRect.bottom > headerHeight) {
-				header.classList.remove('collapsed');
-			}
-		} else {
-			if (headerRect.bottom < headerHeight) {
-				header.classList.add('collapsed');
-			}
-		}
-
 		var scrolledValue = window.scrollY / collapseMargin;
 		scrolledValue = scrolledValue > 0 ? scrolledValue : 0;
 		scrolledValue = scrolledValue < 1 ? scrolledValue : 1;
 
-		var newHeroColor = index().red(headerBackgroundColor.red() + Math.pow(scrolledValue, 2) * (collapsedBackgroundColor.red() - headerBackgroundColor.red())).green(headerBackgroundColor.green() + Math.pow(scrolledValue, 2) * (collapsedBackgroundColor.green() - headerBackgroundColor.green())).blue(headerBackgroundColor.blue() + Math.pow(scrolledValue, 2) * (collapsedBackgroundColor.blue() - headerBackgroundColor.blue())).alpha(headerBackgroundColor.alpha() + Math.pow(scrolledValue, 2) * (collapsedBackgroundColor.alpha() - headerBackgroundColor.alpha())).rgb().string(0);
+		if (backgroundColor) {
+			var newBackgroundColor = computeColor(headerBackgroundColor, collapsedBackgroundColor, scrolledValue).rgb().string(0);
+			header.style.backgroundColor = newBackgroundColor;
+		}
 
-		console.log(newHeroColor);
-
-		header.style.backgroundColor = newHeroColor;
+		if (textColor) {
+			var newTextColor = computeColor(headerTextColor, collapsedTextColor, scrolledValue).rgb().string(0);
+			header.style.color = newTextColor;
+		}
 	}
+}
+
+function computeColor(start, end, transformedValue) {
+	return index().red(start.red() + Math.pow(transformedValue, 2) * (end.red() - start.red())).green(start.green() + Math.pow(transformedValue, 2) * (end.green() - start.green())).blue(start.blue() + Math.pow(transformedValue, 2) * (end.blue() - start.blue())).alpha(start.alpha() + Math.pow(transformedValue, 2) * (end.alpha() - start.alpha()));
 }
 
 module.exports = fadedHeader;
