@@ -1,6 +1,6 @@
 {
   "name": "faded-header",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "./dist/faded-header.cjs.js",
   "browser": "./dist/faded-header.umd.js",
   "js:next": "./dist/faded-header.js",
@@ -12,7 +12,7 @@
     "type": "git"
   },
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c && rollup -c rollup.config.bundle.js"
   },
   "dependencies": {
     "color": "^1.0.3"
