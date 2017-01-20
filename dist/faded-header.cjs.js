@@ -2,7 +2,7 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-const Color = _interopDefault(require('color'));
+var Color = _interopDefault(require('color'));
 
 function fadedHeader(headerSelector, collapseMargin, backgroundColor, textColor) {
 	var header = document.querySelector(headerSelector);

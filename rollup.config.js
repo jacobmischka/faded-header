@@ -16,6 +16,5 @@ export default {
 			dest: './dist/faded-header.cjs.js',
 			format: 'cjs'
 		}
-	],
-	preferConst: true
+	]
 };

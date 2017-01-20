@@ -17,6 +17,5 @@ export default {
 			format: 'umd'
 		}
 	],
-	moduleName: 'fadedHeader',
-	preferConst: true
+	moduleName: 'fadedHeader'
 };
