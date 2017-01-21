@@ -22,7 +22,11 @@
 		</header>
 		<script src="dist/faded-header.umd.js"></script>
 		<script>
-			fadedHeader('header', 500, 'pink', 'red');
+			fadedHeader('header', {
+				transformRange: 500,
+				backgroundColor: 'green',
+				textColor: 'pink'
+			});
 		</script>
 	</body>
 </html>

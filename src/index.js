@@ -1,6 +1,17 @@
 import Color from 'color';
 
-export default function fadedHeader(headerSelector, collapseMargin, backgroundColor, textColor){
+export default function fadedHeader(headerSelector, options){
+	const { backgroundColor, textColor } = options;
+	const transformRange = options.transformRange || window.innerHeight;
+	const easingFunction = ratio => Math.pow(ratio, 2) || options.easingFunction;
+	const backgroundEasingFunction = options.backgroundEasingFunction || easingFunction;
+	const textEasingFunction = options.textEasingFunction || easingFunction;
+	
+	if(!backgroundColor && !textColor){
+		console.log('No colors passed to fadedHeader, nothing to do');
+		return;
+	}
+	
 	const header = document.querySelector(headerSelector);
 
 	let collapsedBackgroundColor = new Color(backgroundColor);
@@ -23,27 +34,34 @@ export default function fadedHeader(headerSelector, collapseMargin, backgroundCo
 	});
 
 	function step(){
-		let scrolledValue = window.scrollY / collapseMargin;
+		let scrolledValue = window.scrollY / transformRange;
 		scrolledValue = scrolledValue > 0 ? scrolledValue : 0;
 		scrolledValue = scrolledValue < 1 ? scrolledValue : 1;
 
 		if(backgroundColor){
-			const newBackgroundColor = computeColor(headerBackgroundColor,
-				collapsedBackgroundColor, scrolledValue).rgb().string(0);
+			const newBackgroundColor = computeColor(
+				headerBackgroundColor,
+				collapsedBackgroundColor,
+				backgroundEasingFunction(scrolledValue)
+			).rgb().string(0);
+			
 			header.style.backgroundColor = newBackgroundColor;
 		}
 		
 		if(textColor){
-			const newTextColor = computeColor(headerTextColor,
-				collapsedTextColor, scrolledValue).rgb().string(0);
+			const newTextColor = computeColor(
+				headerTextColor,
+				collapsedTextColor,
+				textEasingFunction(scrolledValue)
+			).rgb().string(0);
 			header.style.color = newTextColor;
 		}
 	}
 }
 
 function computeColor(start, end, transformedValue){
-	return Color().red(start.red() + (Math.pow(transformedValue, 2) * (end.red() - start.red())))
-		.green(start.green() + (Math.pow(transformedValue, 2) * (end.green() - start.green())))
-		.blue(start.blue() + (Math.pow(transformedValue, 2) * (end.blue() - start.blue())))
-		.alpha(start.alpha() + (Math.pow(transformedValue, 2) * (end.alpha() - start.alpha())));
+	return Color().red(start.red() + (transformedValue * (end.red() - start.red())))
+		.green(start.green() + (transformedValue * (end.green() - start.green())))
+		.blue(start.blue() + (transformedValue * (end.blue() - start.blue())))
+		.alpha(start.alpha() + (transformedValue * (end.alpha() - start.alpha())));
 }

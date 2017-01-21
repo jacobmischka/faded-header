@@ -1933,7 +1933,22 @@ function zeroArray(arr, length) {
 
 var index = Color;
 
-function fadedHeader(headerSelector, collapseMargin, backgroundColor, textColor) {
+function fadedHeader(headerSelector, options) {
+	var backgroundColor = options.backgroundColor,
+	    textColor = options.textColor;
+
+	var transformRange = options.transformRange || window.innerHeight;
+	var easingFunction = function easingFunction(ratio) {
+		return Math.pow(ratio, 2) || options.easingFunction;
+	};
+	var backgroundEasingFunction = options.backgroundEasingFunction || easingFunction;
+	var textEasingFunction = options.textEasingFunction || easingFunction;
+
+	if (!backgroundColor && !textColor) {
+		console.log('No colors passed to fadedHeader, nothing to do');
+		return;
+	}
+
 	var header = document.querySelector(headerSelector);
 
 	var collapsedBackgroundColor = new index(backgroundColor);
@@ -1952,24 +1967,25 @@ function fadedHeader(headerSelector, collapseMargin, backgroundColor, textColor)
 	});
 
 	function step() {
-		var scrolledValue = window.scrollY / collapseMargin;
+		var scrolledValue = window.scrollY / transformRange;
 		scrolledValue = scrolledValue > 0 ? scrolledValue : 0;
 		scrolledValue = scrolledValue < 1 ? scrolledValue : 1;
 
 		if (backgroundColor) {
-			var newBackgroundColor = computeColor(headerBackgroundColor, collapsedBackgroundColor, scrolledValue).rgb().string(0);
+			var newBackgroundColor = computeColor(headerBackgroundColor, collapsedBackgroundColor, backgroundEasingFunction(scrolledValue)).rgb().string(0);
+
 			header.style.backgroundColor = newBackgroundColor;
 		}
 
 		if (textColor) {
-			var newTextColor = computeColor(headerTextColor, collapsedTextColor, scrolledValue).rgb().string(0);
+			var newTextColor = computeColor(headerTextColor, collapsedTextColor, textEasingFunction(scrolledValue)).rgb().string(0);
 			header.style.color = newTextColor;
 		}
 	}
 }
 
 function computeColor(start, end, transformedValue) {
-	return index().red(start.red() + Math.pow(transformedValue, 2) * (end.red() - start.red())).green(start.green() + Math.pow(transformedValue, 2) * (end.green() - start.green())).blue(start.blue() + Math.pow(transformedValue, 2) * (end.blue() - start.blue())).alpha(start.alpha() + Math.pow(transformedValue, 2) * (end.alpha() - start.alpha()));
+	return index().red(start.red() + transformedValue * (end.red() - start.red())).green(start.green() + transformedValue * (end.green() - start.green())).blue(start.blue() + transformedValue * (end.blue() - start.blue())).alpha(start.alpha() + transformedValue * (end.alpha() - start.alpha()));
 }
 
 return fadedHeader;
