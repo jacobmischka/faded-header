@@ -3,7 +3,7 @@ import Color from 'color';
 export default function fadedHeader(headerSelector, options){
 	const { backgroundColor, textColor } = options;
 	const transformRange = options.transformRange || window.innerHeight;
-	const easingFunction = ratio => Math.pow(ratio, 2) || options.easingFunction;
+	const easingFunction =  options.easingFunction || ratio => Math.pow(ratio, 2);
 	const backgroundEasingFunction = options.backgroundEasingFunction || easingFunction;
 	const textEasingFunction = options.textEasingFunction || easingFunction;
 	
