@@ -1,6 +1,6 @@
 {
   "name": "faded-header",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "main": "./dist/faded-header.cjs.js",
   "bundle": "./dist/faded-header.umd.js",
   "module": "./dist/faded-header.js",
