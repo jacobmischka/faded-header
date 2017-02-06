@@ -1934,51 +1934,92 @@ function zeroArray(arr, length) {
 var index = Color;
 
 function fadedHeader(headerSelector, options) {
-	var backgroundColor = options.backgroundColor,
-	    textColor = options.textColor;
-
-	var transformRange = options.transformRange || window.innerHeight;
-	var easingFunction = function easingFunction(ratio) {
-		return Math.pow(ratio, 2) || options.easingFunction;
-	};
-	var backgroundEasingFunction = options.backgroundEasingFunction || easingFunction;
-	var textEasingFunction = options.textEasingFunction || easingFunction;
-
-	if (!backgroundColor && !textColor) {
+	if (!options.backgroundColor && !options.textColor) {
 		console.log('No colors passed to fadedHeader, nothing to do');
 		return;
 	}
 
-	var header = document.querySelector(headerSelector);
+	var backgroundColor = Array.isArray(options.backgroundColor) ? options.backgroundColor : [options.backgroundColor];
+	var textColor = Array.isArray(options.textColor) ? options.textColor : [options.textColor];
+	var transformRange = Array.isArray(options.transformRange) ? options.transformRange : [options.transformRange];
+	var easingFunction = options.easingFunction || function (ratio) {
+		return Math.pow(ratio, 2);
+	};
+	var backgroundEasingFunction = options.backgroundEasingFunction || easingFunction;
+	var textEasingFunction = options.textEasingFunction || easingFunction;
 
-	var collapsedBackgroundColor = new index(backgroundColor);
-	var collapsedTextColor = new index(textColor);
+	var header = document.querySelector(headerSelector);
 
 	var headerBackgroundColor = new index(window.getComputedStyle(header).getPropertyValue('background-color'));
 	if (headerBackgroundColor.valpha === 0) headerBackgroundColor = new index(backgroundColor).alpha(0);
+	backgroundColor.unshift(headerBackgroundColor);
 
 	var headerTextColor = new index(window.getComputedStyle(header).getPropertyValue('color'));
 	if (headerTextColor.valpha === 0) headerTextColor = new index(textColor).alpha(0);
+	textColor.unshift(headerTextColor);
 
-	['resize', 'scroll'].map(function (event) {
+	transformRange.unshift(0);
+
+	backgroundColor = backgroundColor.map(function (color) {
+		return new index(color);
+	});
+	textColor = textColor.map(function (color) {
+		return new index(color);
+	});
+
+	console.log({
+		backgroundColor: backgroundColor,
+		textColor: textColor,
+		transformRange: transformRange
+	});
+
+	['resize', 'scroll', 'load'].map(function (event) {
 		window.addEventListener(event, function () {
 			window.requestAnimationFrame(step);
 		});
 	});
 
 	function step() {
-		var scrolledValue = window.scrollY / transformRange;
+		var i = transformRange.findIndex(function (y) {
+			return window.scrollY < y;
+		});
+		if (i <= 0) {
+			header.style.backgroundColor = backgroundColor[backgroundColor.length - 1];
+			header.style.color = textColor[textColor.length - 1];
+			return;
+		}
+
+		console.log(i);
+
+		var startY = transformRange[i - 1];
+		var endY = transformRange[i];
+
+		var backgroundStart = void 0,
+		    backgroundEnd = void 0;
+		if (i in backgroundColor && i - 1 in backgroundColor) {
+			backgroundStart = backgroundColor[i - 1];
+			backgroundEnd = backgroundColor[i];
+		}
+
+		var textStart = void 0,
+		    textEnd = void 0;
+		if (i in textColor && i - 1 in textColor) {
+			textStart = textColor[i - 1];
+			textEnd = textColor[i];
+		}
+
+		var scrolledValue = (window.scrollY - startY) / (endY - startY);
 		scrolledValue = scrolledValue > 0 ? scrolledValue : 0;
 		scrolledValue = scrolledValue < 1 ? scrolledValue : 1;
 
-		if (backgroundColor) {
-			var newBackgroundColor = computeColor(headerBackgroundColor, collapsedBackgroundColor, backgroundEasingFunction(scrolledValue)).rgb().string(0);
+		if (backgroundStart && backgroundEnd) {
+			var newBackgroundColor = computeColor(backgroundStart, backgroundEnd, backgroundEasingFunction(scrolledValue)).rgb().string(0);
 
 			header.style.backgroundColor = newBackgroundColor;
 		}
 
-		if (textColor) {
-			var newTextColor = computeColor(headerTextColor, collapsedTextColor, textEasingFunction(scrolledValue)).rgb().string(0);
+		if (textStart && textEnd) {
+			var newTextColor = computeColor(textStart, textEnd, textEasingFunction(scrolledValue)).rgb().string(0);
 			header.style.color = newTextColor;
 		}
 	}

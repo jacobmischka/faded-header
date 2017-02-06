@@ -23,5 +23,7 @@ fadedHeader(headerSelector, {
 ```
 If neither `backgroundColor` nor `textColor` are passed, will just log and return without doing anything.
 
+`transformRange`, `backgroundColor`, and `textColor` can be arrays. 
+
 [color]: https://github.com/Qix-/color
 [index]: https://github.com/jacobmischka/faded-header/blob/master/index.html
